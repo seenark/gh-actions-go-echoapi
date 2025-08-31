@@ -1,0 +1,21 @@
+# .dockerignore
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+.env
+.env.local
+.env.*.local
+node_modules
+npm-debug.log*
+.nyc_output
+coverage/
+.coverage
+*.log
+tmp/
+temp/
+.tmp
+.DS_Store
+Thumbs.db
+
