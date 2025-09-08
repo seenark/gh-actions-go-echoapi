@@ -29,10 +29,9 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
       - name: Run linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: ${{ env.GOLANGCI_LINT_VERSION }}
-          args: --timeout=5m
+          version: v2.1
   # Job 2: Testing
   test:
     name: Run Tests
@@ -68,25 +67,6 @@ jobs:
       - name: Run tests
         run: |
           go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
-
-      # Step 6: Upload coverage to Codecov (optional)
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.out
-          flags: unittests
-          name: codecov-umbrella
-
-      # Step 7: Generate coverage report
-      - name: Generate coverage report
-        run: go tool cover -html=coverage.out -o coverage.html
-
-      # Step 8: Upload coverage report as artifact
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.html
 
   # Job 3: Build
   build:
