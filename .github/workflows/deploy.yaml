@@ -8,28 +8,126 @@ env:
   GOOS: linux
 
 jobs:
-  test:
-    environment: testing
+  lint:
     runs-on: ubuntu-latest
-    container:
-      image: go:1.25.0
-      env:
-        GOOS: linux
-    services:
-      redis:
-        image: redis
-        env:
-          THIS_ENV: example_env
-        # ports:
-        #   - 6379:6379
-      # my-surrealdb:
-      # image: surrealdb/surrealdb
-    env:
-      PORT: 1323
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
     steps:
       - name: Get Code
         uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Install dependencies
         run: go mod download
+      - name: Verify dependencies
+        run: go mod verify
+      - name: Run linter
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m
+  # Job 2: Testing
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    # Run tests in parallel with linting
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # Step 3: Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Step 4: Download dependencies
+      - name: Download dependencies
+        run: go mod download
+
+      # Step 5: Run tests with coverage
+      - name: Run tests
+        run: |
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      # Step 6: Upload coverage to Codecov (optional)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.out
+          flags: unittests
+          name: codecov-umbrella
+
+      # Step 7: Generate coverage report
+      - name: Generate coverage report
+        run: go tool cover -html=coverage.out -o coverage.html
+
+      # Step 8: Upload coverage report as artifact
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.html
+
+  # Job 3: Build
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    # Build only after lint and test jobs pass
+    needs: [lint, test]
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # Step 3: Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Step 4: Download dependencies
+      - name: Download dependencies
+        run: go mod download
+
+      # Step 5: Build the application
+      - name: Build application
+        run: |
+          # Create build directory
+          mkdir -p build
+
+          # Build with optimizations and version info
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+            -ldflags="-w -s -X main.version=${{ github.sha }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            -o build/echo-api \
+            ./cmd/server
