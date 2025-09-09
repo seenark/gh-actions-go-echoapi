@@ -1,0 +1,20 @@
+name: Get Dependencies
+description: Get dependencies and cache them
+runs:
+  using: composite
+  steps:
+    # Step 3: Cache Go modules
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    # Step 4: Download dependencies
+    - name: Download dependencies
+      shell: bash
+      run: go mod download
