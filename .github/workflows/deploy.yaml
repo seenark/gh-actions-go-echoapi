@@ -6,7 +6,7 @@ on:
 
 env:
   GOOS: linux
-  GO_VERSION: "1.25.0"
+  GO_VERSION: "1.24.0"
 
 jobs:
   lint:
@@ -113,4 +113,4 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
             -ldflags="-w -s -X main.version=${{ github.sha }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -o build/echo-api \
-            ./cmd/server
+            .
