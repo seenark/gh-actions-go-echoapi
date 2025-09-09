@@ -1,6 +1,6 @@
 module gh-action-echoapi
 
-go 1.25.0
+go 1.24.0
 
 require (
 	github.com/labstack/echo/v4 v4.13.4 // indirect
