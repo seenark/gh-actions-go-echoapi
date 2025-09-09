@@ -1,11 +1,22 @@
 name: Get Dependencies
 description: Get dependencies and cache them
+inputs:
+  caching:
+    description: Whether to cache dependencies
+    required: false
+    default: "true"
+outputs:
+  used-cache:
+    description: Whether the cache was used
+    value: ${{ steps.install-deps.outputs.cache-hit }}
 runs:
   using: composite
   steps:
     # Step 3: Cache Go modules
     - name: Cache Go modules
+      if: inputs.caching == 'true'
       uses: actions/cache@v3
+      id: cache-deps
       with:
         path: |
           ~/.cache/go-build
@@ -16,5 +27,8 @@ runs:
 
     # Step 4: Download dependencies
     - name: Download dependencies
+      id: install-deps
       shell: bash
-      run: go mod download
+      run: |
+        go mod download
+        echo "::set-output name=cache-hit::'${{ inputs.caching }}'"

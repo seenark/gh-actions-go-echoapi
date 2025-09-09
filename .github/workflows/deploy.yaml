@@ -90,7 +90,12 @@ jobs:
 
       # Step 3: use local action to load dpes and cache them
       - name: Load & Cache deps
+        id: cache-deps
         uses: ./.github/actions/cached-deps
+
+      # Step 4: Output info
+      - name: Output info
+        run: echo "Cache used? ${{ steps.cache-deps.outputs.used-cache }}"
 
       # Step 5: Build the application
       - name: Build application
