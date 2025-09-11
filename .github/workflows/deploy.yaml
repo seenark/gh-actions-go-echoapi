@@ -101,10 +101,17 @@ jobs:
       - name: Build application
         run: |
           # Create build directory
-          mkdir -p build
+          mkdir -p buil
 
           # Build with optimizations and version info
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
             -ldflags="-w -s -X main.version=${{ github.sha }} -X main.buildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -o build/echo-api \
             .
+  information:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run JS Custom action
+        uses: ./.github/actions/build-go-echo

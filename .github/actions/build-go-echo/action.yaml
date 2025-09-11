@@ -1,0 +1,8 @@
+name: "Build go echo api"
+description: "Build go echo api"
+runs:
+  using: node24
+  # pre:
+  main: dist/main.js
+# post:
+
