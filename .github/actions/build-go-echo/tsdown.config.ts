@@ -3,7 +3,9 @@ import { defineConfig } from 'tsdown'
 export default defineConfig({
   entry: ['./src/main.ts'],
   outDir: "dist",
-  outputOptions: {
-    format: "esm"
-  }
+  unbundle: false,
+  format: "esm",
+  clean: true,
+  minify: false,
+  external: []
 })

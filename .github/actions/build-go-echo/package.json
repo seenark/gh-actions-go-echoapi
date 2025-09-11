@@ -9,11 +9,10 @@
   "scripts": {
     "build": "./node_modules/.bin/tsdown"
   },
-  "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/exec": "^1.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
     "tsdown": "^0.15.0",
     "typescript": "^5.9.2"
   }
